@@ -26,7 +26,7 @@ const faqItems = [
   },
   {
     question: 'Do you offer refunds?',
-    answer: 'Yes, we offer a 30-day money-back guarantee for Pro subscriptions if you're not satisfied with our service. Enterprise plans have custom refund policies specified in the contract.'
+    answer: "Yes, we offer a 30-day money-back guarantee for Pro subscriptions if you're not satisfied with our service. Enterprise plans have custom refund policies specified in the contract."
   },
   {
     question: 'Is there an API available for integration?',
