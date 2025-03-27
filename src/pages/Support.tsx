@@ -4,14 +4,14 @@ import ContactForm from '../components/ContactForm';
 
 const Support = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-tovector-black to-tovector-darkgray py-24">
+    <div className="min-h-screen bg-white py-24">
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-tovector-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
             We're Here to <span className="text-tovector-red">Help</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             Have a question or need assistance? Our support team is ready to help you.
           </p>
           <div className="w-20 h-1 bg-tovector-red mx-auto mt-6"></div>
@@ -24,7 +24,7 @@ const Support = () => {
           </div>
           
           {/* Support Information */}
-          <div className="bg-tovector-white text-tovector-black rounded-xl overflow-hidden shadow-md">
+          <div className="bg-white text-black rounded-xl overflow-hidden shadow-md border border-gray-200">
             <div className="p-8">
               <h2 className="text-2xl font-bold mb-6">Support Information</h2>
               
@@ -52,17 +52,8 @@ const Support = () => {
                         <a href="mailto:support@tovector.ai" className="text-tovector-red hover:underline">
                           support@tovector.ai
                         </a>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <svg className="w-6 h-6 text-tovector-red mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      <div>
-                        <p className="font-medium">Live Chat</p>
-                        <p className="text-gray-600">
-                          Available during business hours
+                        <p className="text-gray-600 mt-1">
+                          We'll get back to you within 24 hours
                         </p>
                       </div>
                     </div>
@@ -70,7 +61,7 @@ const Support = () => {
                 </div>
                 
                 {/* FAQ Link */}
-                <div className="bg-gray-100 p-6 rounded-lg">
+                <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
                   <h3 className="font-bold text-lg mb-2">
                     Check our FAQ
                   </h3>

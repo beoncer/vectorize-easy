@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FAQItemProps {
@@ -17,36 +17,22 @@ const FAQItem: React.FC<FAQItemProps> = ({
   toggleOpen,
   index
 }) => {
-  const [internalOpen, setInternalOpen] = useState(isOpen);
-  const isEven = index % 2 === 0;
-  
-  const handleToggle = () => {
-    if (toggleOpen) {
-      toggleOpen();
-    } else {
-      setInternalOpen(!internalOpen);
-    }
-  };
-
-  const open = toggleOpen ? isOpen : internalOpen;
+  const open = toggleOpen ? isOpen : false;
 
   return (
-    <div className={`transition-all duration-300 overflow-hidden
-      ${isEven ? 'bg-tovector-white' : 'bg-tovector-black'}
-      ${open ? 'shadow-md' : 'hover:shadow-sm'}`}
-    >
+    <div className="transition-all duration-300 overflow-hidden bg-white border-gray-200">
       <button
         className="w-full text-left px-6 py-5 flex justify-between items-center"
-        onClick={handleToggle}
+        onClick={toggleOpen}
         aria-expanded={open}
       >
-        <h3 className={`font-medium text-lg ${isEven ? 'text-tovector-black' : 'text-tovector-white'}`}>
+        <h3 className="font-bold text-lg text-tovector-red">
           {question}
         </h3>
         {open ? (
-          <ChevronUp className={`flex-shrink-0 ml-2 ${isEven ? 'text-tovector-red' : 'text-tovector-red'}`} />
+          <ChevronUp className="flex-shrink-0 ml-2 text-tovector-red" />
         ) : (
-          <ChevronDown className={`flex-shrink-0 ml-2 ${isEven ? 'text-tovector-red' : 'text-tovector-red'}`} />
+          <ChevronDown className="flex-shrink-0 ml-2 text-tovector-red" />
         )}
       </button>
 
@@ -56,7 +42,7 @@ const FAQItem: React.FC<FAQItemProps> = ({
       >
         <div className="px-6 pb-5">
           <div className="w-12 h-0.5 bg-tovector-red mb-4"></div>
-          <p className={`text-sm ${isEven ? 'text-gray-700' : 'text-gray-300'}`}>
+          <p className="text-black">
             {answer}
           </p>
         </div>

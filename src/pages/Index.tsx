@@ -155,10 +155,10 @@ const Index = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/examples" className="btn-secondary">
+            <Link to="/examples" className="btn-secondary min-w-[160px] px-6 py-3 text-center">
               See Examples
             </Link>
-            <Link to="/pricing" className="btn-primary">
+            <Link to="/pricing" className="btn-primary min-w-[160px] px-6 py-3 text-center flex items-center justify-center">
               Get Started <ArrowRight size={16} className="ml-2" />
             </Link>
           </div>

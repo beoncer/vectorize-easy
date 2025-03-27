@@ -5,32 +5,24 @@ import FAQItem from '../components/FAQItem';
 // FAQ data
 const faqItems = [
   {
-    question: 'What file formats can I upload?',
-    answer: 'We currently support PNG and JPG/JPEG formats for vectorization. We recommend using high-resolution images for the best results. The maximum file size is 35MB.'
+    question: 'What file types are supported?',
+    answer: 'PNG and JPG files up to 35MB. For best results, we recommend using high-resolution images with clear edges.'
   },
   {
-    question: 'How long does the vectorization process take?',
-    answer: 'Most images are processed within seconds, but complex images may take up to a minute. Pro and Enterprise plans receive priority processing for faster results.'
+    question: 'How many credits do I need?',
+    answer: 'One credit per conversion. Each successful vectorization consumes one credit from your account.'
   },
   {
-    question: 'What vector formats can I export to?',
-    answer: 'Free users can export to SVG format only. Pro and Enterprise users can export to SVG, EPS, AI (Adobe Illustrator), PDF, and DXF formats.'
+    question: 'What vector formats can I download?',
+    answer: 'All users can download SVG files. Premium users can also access EPS, AI, and PDF formats.'
   },
   {
     question: 'How accurate is the vectorization?',
-    answer: 'Our AI-powered engine delivers industry-leading accuracy. The quality depends on the input image - clearer images with good contrast will produce better results. Pro users get access to enhanced algorithms for higher quality output.'
+    answer: 'Our AI-powered engine delivers industry-leading accuracy. The quality depends on the input image - clearer images with good contrast will produce better results.'
   },
   {
     question: 'Can I use the vectors commercially?',
-    answer: 'Free users can use vectors for personal projects only. Pro and Enterprise plans include commercial usage rights, allowing you to use the vectors in commercial products, client work, and merchandise.'
-  },
-  {
-    question: 'Do you offer refunds?',
-    answer: "Yes, we offer a 30-day money-back guarantee for Pro subscriptions if you're not satisfied with our service. Enterprise plans have custom refund policies specified in the contract."
-  },
-  {
-    question: 'Is there an API available for integration?',
-    answer: 'Yes, API access is available for Enterprise plans only. This allows you to integrate our vectorization technology directly into your workflow or application. Contact our sales team for details.'
+    answer: 'Yes, all vectors created with tovector.ai are license-free and can be used for both personal and commercial projects.'
   }
 ];
 

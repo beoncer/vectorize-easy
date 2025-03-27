@@ -73,12 +73,12 @@ const ContactForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-tovector-black text-tovector-white rounded-xl overflow-hidden shadow-md">
+    <div className="bg-white text-black rounded-xl overflow-hidden shadow-md border border-gray-200">
       <div className="p-8">
         <h3 className="text-2xl font-bold mb-6">Get in Touch</h3>
         
         {submitSuccess && (
-          <div className="mb-6 p-4 bg-green-500/20 border border-green-500 rounded-md text-green-400">
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500 rounded-md text-green-600">
             Thank you for your message! We'll get back to you soon.
           </div>
         )}
@@ -94,8 +94,8 @@ const ContactForm: React.FC = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-tovector-black border rounded-md focus:outline-none focus:ring-2 transition-colors
-                ${errors.name ? 'border-red-500 focus:ring-red-500/50' : 'border-gray-700 focus:border-tovector-red focus:ring-tovector-red/30'}`}
+              className={`w-full px-4 py-3 bg-white border rounded-md focus:outline-none focus:ring-2 transition-colors
+                ${errors.name ? 'border-red-500 focus:ring-red-500/50' : 'border-gray-300 focus:border-tovector-red focus:ring-tovector-red/30'}`}
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -112,8 +112,8 @@ const ContactForm: React.FC = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-tovector-black border rounded-md focus:outline-none focus:ring-2 transition-colors
-                ${errors.email ? 'border-red-500 focus:ring-red-500/50' : 'border-gray-700 focus:border-tovector-red focus:ring-tovector-red/30'}`}
+              className={`w-full px-4 py-3 bg-white border rounded-md focus:outline-none focus:ring-2 transition-colors
+                ${errors.email ? 'border-red-500 focus:ring-red-500/50' : 'border-gray-300 focus:border-tovector-red focus:ring-tovector-red/30'}`}
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-500">{errors.email}</p>
@@ -130,8 +130,8 @@ const ContactForm: React.FC = () => {
               rows={5}
               value={formData.message}
               onChange={handleChange}
-              className={`w-full px-4 py-3 bg-tovector-black border rounded-md focus:outline-none focus:ring-2 transition-colors
-                ${errors.message ? 'border-red-500 focus:ring-red-500/50' : 'border-gray-700 focus:border-tovector-red focus:ring-tovector-red/30'}`}
+              className={`w-full px-4 py-3 bg-white border rounded-md focus:outline-none focus:ring-2 transition-colors
+                ${errors.message ? 'border-red-500 focus:ring-red-500/50' : 'border-gray-300 focus:border-tovector-red focus:ring-tovector-red/30'}`}
             />
             {errors.message && (
               <p className="mt-1 text-sm text-red-500">{errors.message}</p>
@@ -159,15 +159,6 @@ const ContactForm: React.FC = () => {
             )}
           </button>
         </form>
-        
-        <div className="mt-8 pt-6 border-t border-gray-800 text-center">
-          <p className="text-sm text-gray-400">
-            You can also reach us directly at{' '}
-            <a href="mailto:support@tovector.ai" className="text-tovector-red hover:underline">
-              support@tovector.ai
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, DragEvent } from 'react';
 import { Upload } from 'lucide-react';
+import VectorEditor from './VectorEditor';
 
 interface FileUploaderProps {
   onFileSelect?: (file: File) => void;
@@ -10,6 +11,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_FILE_SIZE = 35 * 1024 * 1024; // 35MB
@@ -75,11 +77,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
   };
 
   const handleUploadClick = () => {
-    if (selectedFile && onFileSelect) {
-      onFileSelect(selectedFile);
-      // In a real app, you would trigger the upload process here
-      console.log('Uploading file:', selectedFile.name);
+    if (selectedFile) {
+      setIsEditorOpen(true);
+      if (onFileSelect) onFileSelect(selectedFile);
     }
+  };
+
+  const handleEditorClose = () => {
+    setIsEditorOpen(false);
   };
 
   return (
@@ -150,6 +155,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
           </button>
         </div>
       )}
+
+      <VectorEditor 
+        isOpen={isEditorOpen} 
+        onClose={handleEditorClose} 
+        imageFile={selectedFile} 
+      />
     </div>
   );
 };
