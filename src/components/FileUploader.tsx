@@ -112,7 +112,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
           />
           
           <div className="space-y-2">
-            <h3 className="text-xl font-medium">
+            <h3 className="text-xl font-medium text-black">
               {selectedFile ? selectedFile.name : 'Drag and drop your image here'}
             </h3>
             <p className="text-sm text-gray-500">
@@ -124,7 +124,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
             {!selectedFile && (
               <button 
                 type="button" 
-                className="mt-2 px-4 py-2 inline-flex items-center text-sm font-medium rounded-md text-tovector-white bg-tovector-red hover:bg-tovector-red/90"
+                className="mt-2 px-4 py-2 inline-flex items-center text-sm font-medium rounded-md text-black bg-tovector-red hover:bg-tovector-red/90"
               >
                 Browse Files
               </button>

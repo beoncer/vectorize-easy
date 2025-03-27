@@ -6,13 +6,13 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-tovector-black text-tovector-white py-12">
+    <footer className="bg-white text-black py-12 border-t border-gray-200">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {/* Logo & Tagline */}
           <div className="flex flex-col">
             <Link to="/" className="font-bold text-2xl text-tovector-red">tovector.ai</Link>
-            <p className="mt-2 text-sm text-tovector-white/70">Convert your images to vectors instantly</p>
+            <p className="mt-2 text-sm text-gray-600">Convert your images to vectors instantly</p>
           </div>
           
           {/* Quick Links */}
@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
           </div>
           
           {/* Copyright */}
-          <div className="text-right text-sm text-tovector-white/70 flex justify-center md:justify-end">
+          <div className="text-right text-sm text-gray-600 flex justify-center md:justify-end">
             <p>© {currentYear} tovector.ai. All rights reserved.</p>
           </div>
         </div>

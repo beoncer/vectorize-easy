@@ -1,20 +1,54 @@
 
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import FileUploader from '../components/FileUploader';
 import { Link } from 'react-router-dom';
 
+// New component for testimonials
+const Testimonial = ({ quote, name, stars }: { quote: string; name: string; stars: number }) => (
+  <div className="bg-white rounded-lg shadow-md p-6 flex flex-col h-full">
+    <p className="text-lg mb-4 flex-grow">"{quote}"</p>
+    <div>
+      <div className="flex text-tovector-red mb-2">
+        {[...Array(stars)].map((_, i) => (
+          <Star key={i} fill="#FF3A46" size={18} />
+        ))}
+      </div>
+      <p className="font-medium">{name}</p>
+    </div>
+  </div>
+);
+
 const Index = () => {
+  // Testimonial data
+  const testimonials = [
+    {
+      quote: "Transformed my logo design in seconds! The vector quality is outstanding.",
+      name: "John D.",
+      stars: 5
+    },
+    {
+      quote: "Perfect for my illustrations. I can now scale them to any size without losing quality.",
+      name: "Sarah K.",
+      stars: 5
+    },
+    {
+      quote: "So easy to use! I've tried other vectorization tools but none are as fast and accurate as tovector.",
+      name: "Mike P.",
+      stars: 5
+    }
+  ];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-tovector-black text-tovector-white min-h-[90vh] flex items-center">
+      <section className="relative overflow-hidden bg-white text-black min-h-[90vh] flex items-center">
         <div className="container mx-auto px-6 py-24 z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight animate-fade-in">
               Convert Your Images to <span className="text-tovector-red">Vectors</span> Instantly
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 mb-10 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl text-gray-700 mb-10 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               Upload your PNG or JPG and get high-quality vectors in seconds. Perfect for designers, developers, and creatives.
             </p>
             
@@ -26,16 +60,39 @@ const Index = () => {
         
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-tovector-red to-tovector-black"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-tovector-red to-white"></div>
           <div className="absolute inset-0" style={{ 
-            backgroundImage: 'radial-gradient(circle at 25px 25px, rgba(255, 255, 255, 0.2) 2px, transparent 0)', 
+            backgroundImage: 'radial-gradient(circle at 25px 25px, rgba(0, 0, 0, 0.2) 2px, transparent 0)', 
             backgroundSize: '50px 50px' 
           }}></div>
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              What Our <span className="text-tovector-red">Users Say</span>
+            </h2>
+            <div className="w-20 h-1 bg-tovector-red mx-auto"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <Testimonial 
+                key={index}
+                quote={testimonial.quote}
+                name={testimonial.name}
+                stars={testimonial.stars}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="py-20 bg-tovector-white">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -53,7 +110,7 @@ const Index = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Get your vectors in seconds, not minutes or hours. Our AI-powered engine works at lightning speed.
               </p>
             </div>
@@ -66,7 +123,7 @@ const Index = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-3">High Quality</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Our advanced algorithms ensure clean, precise vectors with perfect curves and edges.
               </p>
             </div>
@@ -79,7 +136,7 @@ const Index = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-3">Multiple Formats</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Export your vectors in SVG, EPS, AI, and other popular formats for use in any design software.
               </p>
             </div>
@@ -88,12 +145,12 @@ const Index = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-tovector-black text-tovector-white py-20">
+      <section className="bg-gray-50 text-black py-20">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to transform your images?
           </h2>
-          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 mb-10 max-w-2xl mx-auto">
             Join thousands of designers and illustrators who are saving time with tovector.ai
           </p>
           

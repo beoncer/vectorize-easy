@@ -25,7 +25,7 @@ const Header: React.FC = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-tovector-black/90 backdrop-blur-lg py-3 shadow-md' : 'bg-tovector-black py-5'
+        isScrolled ? 'bg-white/90 backdrop-blur-lg py-3 shadow-md' : 'bg-white py-5'
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -50,7 +50,7 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden text-tovector-white"
+          className="md:hidden text-black"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -60,16 +60,16 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       <div 
-        className={`fixed inset-0 bg-tovector-black z-40 transition-transform duration-300 pt-20 px-6 md:hidden ${
+        className={`fixed inset-0 bg-white z-40 transition-transform duration-300 pt-20 px-6 md:hidden ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <nav className="flex flex-col space-y-6 text-center">
-          <Link to="/" className="text-xl font-medium text-tovector-white hover:text-tovector-red">Home</Link>
-          <Link to="/examples" className="text-xl font-medium text-tovector-white hover:text-tovector-red">Examples</Link>
-          <Link to="/pricing" className="text-xl font-medium text-tovector-white hover:text-tovector-red">Pricing</Link>
-          <Link to="/faq" className="text-xl font-medium text-tovector-white hover:text-tovector-red">FAQ</Link>
-          <Link to="/support" className="text-xl font-medium text-tovector-white hover:text-tovector-red">Support</Link>
+          <Link to="/" className="text-xl font-medium text-black hover:text-tovector-red">Home</Link>
+          <Link to="/examples" className="text-xl font-medium text-black hover:text-tovector-red">Examples</Link>
+          <Link to="/pricing" className="text-xl font-medium text-black hover:text-tovector-red">Pricing</Link>
+          <Link to="/faq" className="text-xl font-medium text-black hover:text-tovector-red">FAQ</Link>
+          <Link to="/support" className="text-xl font-medium text-black hover:text-tovector-red">Support</Link>
           
           <div className="pt-6 flex flex-col space-y-4">
             <Link to="/login" className="btn-secondary w-full">Log In</Link>

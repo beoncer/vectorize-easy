@@ -42,21 +42,21 @@ const FAQ = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-tovector-black to-tovector-darkgray py-24">
+    <div className="min-h-screen bg-white py-24">
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-tovector-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
             Frequently Asked <span className="text-tovector-red">Questions</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             Find answers to the most common questions about tovector.ai and our vectorization service.
           </p>
           <div className="w-20 h-1 bg-tovector-red mx-auto mt-6"></div>
         </div>
         
         {/* FAQ List */}
-        <div className="max-w-3xl mx-auto divide-y divide-gray-800 rounded-lg overflow-hidden">
+        <div className="max-w-3xl mx-auto divide-y divide-gray-200 rounded-lg overflow-hidden">
           {faqItems.map((item, index) => (
             <FAQItem
               key={index}
@@ -71,10 +71,10 @@ const FAQ = () => {
         
         {/* Contact Section */}
         <div className="text-center mt-16">
-          <h2 className="text-2xl font-bold text-tovector-white mb-4">
+          <h2 className="text-2xl font-bold text-black mb-4">
             Still have questions?
           </h2>
-          <p className="text-gray-300 mb-6">
+          <p className="text-gray-700 mb-6">
             Can't find the answer you're looking for? Please contact our support team.
           </p>
           <a href="/support" className="btn-primary inline-flex items-center">

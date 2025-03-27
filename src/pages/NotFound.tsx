@@ -13,7 +13,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-tovector-black text-tovector-white px-6">
+    <div className="min-h-screen flex items-center justify-center bg-white text-black px-6">
       <div className="text-center">
         <div className="relative">
           <h1 className="text-9xl font-bold text-tovector-red mb-4">404</h1>
@@ -21,7 +21,7 @@ const NotFound = () => {
         </div>
         
         <p className="text-2xl mb-6">Oops! Page not found</p>
-        <p className="text-gray-400 mb-8 max-w-md mx-auto">
+        <p className="text-gray-600 mb-8 max-w-md mx-auto">
           We couldn't find the page you're looking for. The page may have been moved, deleted, or never existed.
         </p>
         
