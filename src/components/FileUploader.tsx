@@ -63,6 +63,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
       
       if (validateFile(file)) {
         setSelectedFile(file);
+        // Automatically open the editor when file is selected
+        setIsEditorOpen(true);
         if (onFileSelect) onFileSelect(file);
       }
     }
@@ -74,6 +76,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
       
       if (validateFile(file)) {
         setSelectedFile(file);
+        // Automatically open the editor when file is selected
+        setIsEditorOpen(true);
         if (onFileSelect) onFileSelect(file);
       }
     }
@@ -82,13 +86,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
   const handleButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
-    }
-  };
-
-  const handleUploadClick = () => {
-    if (selectedFile) {
-      setIsEditorOpen(true);
-      if (onFileSelect) onFileSelect(selectedFile);
     }
   };
 
@@ -156,18 +153,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
           </div>
         )}
       </div>
-      
-      {selectedFile && (
-        <div className="mt-6 flex justify-center">
-          <button 
-            onClick={handleUploadClick}
-            className="btn-primary inline-flex items-center font-bold"
-          >
-            <Upload size={18} className="mr-2" />
-            Convert to Vector
-          </button>
-        </div>
-      )}
 
       <VectorEditor 
         isOpen={isEditorOpen} 
