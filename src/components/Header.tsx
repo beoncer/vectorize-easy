@@ -1,81 +1,96 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { UserButton, SignInButton, SignUpButton } from '@clerk/clerk-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from './ui/button';
 
 const Header: React.FC = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isLoggedIn, credits } = useAuth();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close mobile menu when changing routes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+  // Helper function to determine if a link is active
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname !== '/') {
+      return false;
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/90 backdrop-blur-lg py-3 shadow-md' : 'bg-white py-5'
-      }`}
-    >
-      <div className="container mx-auto px-6 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <span className="font-bold text-2xl text-tovector-red tracking-tight">tovector.ai</span>
-        </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+      <div className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo and brand */}
+          <Link to="/" className="flex items-center">
+            <span className="text-2xl font-bold text-tovector-red">tovector.ai</span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/examples" className="nav-link">Examples</Link>
-          <Link to="/pricing" className="nav-link">Pricing</Link>
-          <Link to="/faq" className="nav-link">FAQ</Link>
-          <Link to="/support" className="nav-link">Support</Link>
-        </nav>
+          {/* Navigation links */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/"
+              className={`nav-link ${isActive('/') ? 'after:scale-x-100 after:origin-bottom-left' : ''}`}
+            >
+              Home
+            </Link>
+            <Link
+              to="/examples"
+              className={`nav-link ${isActive('/examples') ? 'after:scale-x-100 after:origin-bottom-left' : ''}`}
+            >
+              Examples
+            </Link>
+            <Link
+              to="/pricing"
+              className={`nav-link ${isActive('/pricing') ? 'after:scale-x-100 after:origin-bottom-left' : ''}`}
+            >
+              Pricing
+            </Link>
+            <Link
+              to="/faq"
+              className={`nav-link ${isActive('/faq') ? 'after:scale-x-100 after:origin-bottom-left' : ''}`}
+            >
+              FAQ
+            </Link>
+            <Link
+              to="/support"
+              className={`nav-link ${isActive('/support') ? 'after:scale-x-100 after:origin-bottom-left' : ''}`}
+            >
+              Support
+            </Link>
+          </nav>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center space-x-4">
-          <Link to="/login" className="btn-secondary">Log In</Link>
-          <Link to="/signup" className="btn-primary">Get Started</Link>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-black"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      <div 
-        className={`fixed inset-0 bg-white z-40 transition-transform duration-300 pt-20 px-6 md:hidden ${
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <nav className="flex flex-col space-y-6 text-center">
-          <Link to="/" className="text-xl font-medium text-black hover:text-tovector-red">Home</Link>
-          <Link to="/examples" className="text-xl font-medium text-black hover:text-tovector-red">Examples</Link>
-          <Link to="/pricing" className="text-xl font-medium text-black hover:text-tovector-red">Pricing</Link>
-          <Link to="/faq" className="text-xl font-medium text-black hover:text-tovector-red">FAQ</Link>
-          <Link to="/support" className="text-xl font-medium text-black hover:text-tovector-red">Support</Link>
-          
-          <div className="pt-6 flex flex-col space-y-4">
-            <Link to="/login" className="btn-secondary w-full">Log In</Link>
-            <Link to="/signup" className="btn-primary w-full">Get Started</Link>
+          {/* Auth buttons */}
+          <div className="flex items-center space-x-4">
+            {isLoggedIn ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className={`nav-link hidden md:inline-block ${isActive('/dashboard') ? 'after:scale-x-100 after:origin-bottom-left' : ''}`}
+                >
+                  Dashboard
+                </Link>
+                <div className="hidden md:flex items-center border rounded-full px-3 py-1 border-tovector-red">
+                  <span className="text-sm font-medium">{credits} credits</span>
+                </div>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="outline" className="text-black border-tovector-red hover:bg-tovector-red/10">
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button className="bg-tovector-red text-black hover:bg-tovector-red/90">
+                    Get Started
+                  </Button>
+                </SignUpButton>
+              </>
+            )}
           </div>
-        </nav>
+        </div>
       </div>
     </header>
   );

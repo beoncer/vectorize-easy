@@ -1,9 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/contexts/AuthContext';
+import { deductCredits } from '@/lib/supabase';
 
 interface VectorEditorProps {
   isOpen: boolean;
@@ -14,27 +18,33 @@ interface VectorEditorProps {
 const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile }) => {
   const [view, setView] = useState<'edit' | 'preview' | 'vectorize'>('edit');
   const [selectedFormat, setSelectedFormat] = useState<string>('svg');
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // Mock auth state - replace with real auth later
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const params = useParams();
+  const { isLoggedIn, userId, credits, refreshCredits } = useAuth();
   
-  // Generate a random ID for the image
+  // Generate a random ID for the image or use the one from URL
   const imageId = React.useMemo(() => {
-    return Math.random().toString(36).substring(2, 12);
-  }, [imageFile]);
+    return params.imageId || Math.random().toString(36).substring(2, 12);
+  }, [params.imageId]);
+
+  // Set the view based on URL params
+  useEffect(() => {
+    if (params.action) {
+      if (params.action === 'preview') {
+        setView('preview');
+      } else if (params.action === 'vectorize') {
+        setView('vectorize');
+      } else {
+        setView('edit');
+      }
+    }
+  }, [params.action]);
 
   // Update the URL when the editor is open
   useEffect(() => {
     if (isOpen && imageFile) {
-      const url = new URL(window.location.href);
-      
-      if (view === 'edit') {
-        url.pathname = `/images/${imageId}/edit`;
-      } else if (view === 'preview') {
-        url.pathname = `/images/${imageId}/preview`;
-      } else if (view === 'vectorize') {
-        url.pathname = `/images/${imageId}/vectorize`;
-      }
-      
-      window.history.pushState({}, '', url.toString());
+      updateUrlPath();
       
       return () => {
         // Reset the URL when the editor is closed
@@ -45,19 +55,85 @@ const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile 
     }
   }, [isOpen, imageId, imageFile, view]);
 
-  // Handle view changes
-  const handlePreviewClick = () => {
-    setView('preview');
+  const updateUrlPath = () => {
+    if (view === 'edit') {
+      navigate(`/images/${imageId}/edit`, { replace: true });
+    } else if (view === 'preview') {
+      navigate(`/images/${imageId}/preview`, { replace: true });
+    } else if (view === 'vectorize') {
+      navigate(`/images/${imageId}/vectorize`, { replace: true });
+    }
   };
 
-  const handleVectorizeClick = () => {
-    setView('vectorize');
+  // Handle view changes
+  const handlePreviewClick = async () => {
+    if (!isLoggedIn) {
+      navigate('/sign-up');
+      return;
+    }
+
+    if (credits < 0.2) {
+      toast({
+        title: "Insufficient credits",
+        description: "You need at least 0.2 credits to preview. Please purchase more credits.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Deduct credits for preview
+    if (userId) {
+      const success = await deductCredits(userId, 0.2, 'preview');
+      if (success) {
+        setView('preview');
+        updateUrlPath();
+        // Refresh user credits
+        refreshCredits();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to deduct credits. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleVectorizeClick = async () => {
+    if (!isLoggedIn) {
+      navigate('/sign-up');
+      return;
+    }
+
+    if (credits < 1) {
+      toast({
+        title: "Insufficient credits",
+        description: "You need at least 1 credit to vectorize. Please purchase more credits.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Deduct credits for vectorization
+    if (userId) {
+      const success = await deductCredits(userId, 1, 'vectorize');
+      if (success) {
+        setView('vectorize');
+        updateUrlPath();
+        // Refresh user credits
+        refreshCredits();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to deduct credits. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   const handleSignUpClick = () => {
-    // Mock sign-up functionality - replace with real auth later
-    console.log('User clicked Sign Up');
-    setIsLoggedIn(true);
+    navigate('/sign-up');
   };
 
   const handleDownload = () => {
@@ -69,6 +145,11 @@ const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      toast({
+        title: "Download started",
+        description: `Your file is being downloaded as ${selectedFormat.toUpperCase()}`,
+      });
     }
   };
 

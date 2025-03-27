@@ -1,8 +1,11 @@
 
 import React, { useState, useRef, DragEvent, useEffect } from 'react';
 import { Upload } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import VectorEditor from './VectorEditor';
+import { useAuth } from '@/contexts/AuthContext';
+import { uploadImage } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface FileUploaderProps {
   onFileSelect?: (file: File) => void;
@@ -13,8 +16,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const params = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { userId, isLoggedIn } = useAuth();
 
   // Check if we're on an image edit/preview/vectorize route
   useEffect(() => {
@@ -54,32 +61,64 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
     return true;
   };
 
+  const handleFile = async (file: File) => {
+    if (validateFile(file)) {
+      setSelectedFile(file);
+      setIsUploading(true);
+      
+      try {
+        // Generate a unique ID for the image (this will be replaced with Supabase ID)
+        const imageId = Math.random().toString(36).substring(2, 12);
+        
+        // If user is logged in, upload to Supabase
+        if (isLoggedIn && userId) {
+          const result = await uploadImage(file, userId);
+          
+          if (result) {
+            // Automatically redirect to editor with the image ID
+            navigate(`/images/${result.id}/edit`);
+          } else {
+            toast({
+              title: "Upload failed",
+              description: "There was an error uploading your image. Please try again.",
+              variant: "destructive"
+            });
+          }
+        } else {
+          // For non-logged in users, just open the editor locally
+          navigate(`/images/${imageId}/edit`);
+        }
+        
+        // Open the editor
+        setIsEditorOpen(true);
+        if (onFileSelect) onFileSelect(file);
+      } catch (err) {
+        console.error("Error processing file:", err);
+        toast({
+          title: "Upload failed",
+          description: "There was an error processing your image. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      
-      if (validateFile(file)) {
-        setSelectedFile(file);
-        // Automatically open the editor when file is selected
-        setIsEditorOpen(true);
-        if (onFileSelect) onFileSelect(file);
-      }
+      handleFile(file);
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      
-      if (validateFile(file)) {
-        setSelectedFile(file);
-        // Automatically open the editor when file is selected
-        setIsEditorOpen(true);
-        if (onFileSelect) onFileSelect(file);
-      }
+      handleFile(file);
     }
   };
 
@@ -140,8 +179,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
               <button 
                 type="button" 
                 className="mt-2 px-4 py-2 inline-flex items-center text-sm font-medium rounded-md text-black bg-tovector-red hover:bg-tovector-red/90"
+                disabled={isUploading}
               >
-                Browse Files
+                {isUploading ? 'Uploading...' : 'Browse Files'}
               </button>
             )}
           </div>
