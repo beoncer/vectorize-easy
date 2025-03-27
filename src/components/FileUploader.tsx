@@ -1,6 +1,7 @@
 
-import React, { useState, useRef, DragEvent } from 'react';
+import React, { useState, useRef, DragEvent, useEffect } from 'react';
 import { Upload } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import VectorEditor from './VectorEditor';
 
 interface FileUploaderProps {
@@ -13,6 +14,14 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const params = useParams();
+
+  // Check if we're on an image edit/preview/vectorize route
+  useEffect(() => {
+    if (params.imageId && params.action && selectedFile) {
+      setIsEditorOpen(true);
+    }
+  }, [params.imageId, params.action, selectedFile]);
 
   const MAX_FILE_SIZE = 35 * 1024 * 1024; // 35MB
   const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg'];
@@ -85,6 +94,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
 
   const handleEditorClose = () => {
     setIsEditorOpen(false);
+    // Reset the URL when the editor is closed
+    if (window.location.pathname.includes('/images/')) {
+      window.history.pushState({}, '', '/');
+    }
   };
 
   return (

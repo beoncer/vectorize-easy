@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
-import { X, Download, PaintBucket, Minimize, Edit3 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { X, Download } from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface VectorEditorProps {
   isOpen: boolean;
@@ -10,23 +11,26 @@ interface VectorEditorProps {
 }
 
 const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile }) => {
-  const [activeTab, setActiveTab] = useState<'preview' | 'options'>('preview');
-  const [options, setOptions] = useState({
-    colors: 5,
-    simplify: 50,
-    smoothing: 50
-  });
-
+  const [view, setView] = useState<'edit' | 'preview' | 'vectorize'>('edit');
+  
   // Generate a random ID for the image
   const imageId = React.useMemo(() => {
     return Math.random().toString(36).substring(2, 12);
   }, [imageFile]);
 
   // Update the URL when the editor is open
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen && imageFile) {
       const url = new URL(window.location.href);
-      url.pathname = `/images/${imageId}/edit`;
+      
+      if (view === 'edit') {
+        url.pathname = `/images/${imageId}/edit`;
+      } else if (view === 'preview') {
+        url.pathname = `/images/${imageId}/preview`;
+      } else if (view === 'vectorize') {
+        url.pathname = `/images/${imageId}/vectorize`;
+      }
+      
       window.history.pushState({}, '', url.toString());
       
       return () => {
@@ -36,154 +40,101 @@ const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile 
         }
       };
     }
-  }, [isOpen, imageId, imageFile]);
+  }, [isOpen, imageId, imageFile, view]);
 
-  const handleOptionChange = (option: keyof typeof options, value: number) => {
-    setOptions(prev => ({
-      ...prev,
-      [option]: value
-    }));
+  // Handle view changes
+  const handlePreviewClick = () => {
+    setView('preview');
+  };
+
+  const handleVectorizeClick = () => {
+    setView('vectorize');
   };
 
   const handleDownload = () => {
-    console.log("Downloading vector with options:", options);
-    // In a real app, this would trigger the actual download
-    alert("Vector file download started!");
+    if (imageFile) {
+      // Create a download link for the image
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(imageFile);
+      link.download = `vectorized_${imageFile.name.split('.')[0]}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   if (!imageFile) return null;
 
+  const imageUrl = URL.createObjectURL(imageFile);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-auto p-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex justify-between items-center w-full">
-            <DialogTitle className="text-xl font-bold">Vector Editor</DialogTitle>
-            <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
-              <X size={20} />
-            </button>
-          </div>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
+        {/* Header */}
+        <div className="border-b py-2 px-4 flex justify-between items-center">
+          {view === 'edit' && (
+            <div className="flex space-x-4">
+              <Button
+                variant="outline" 
+                className="border-tovector-red text-black hover:bg-tovector-red/10"
+                onClick={handlePreviewClick}
+              >
+                Preview (0.2 credits)
+              </Button>
+              <Button
+                variant="outline"
+                className="border-tovector-red text-black hover:bg-tovector-red/10"
+                onClick={handleVectorizeClick}
+              >
+                Vectorize (1 credit)
+              </Button>
+            </div>
+          )}
+          {view !== 'edit' && (
+            <div></div> // Empty div to maintain space in the flex layout
+          )}
+          <button 
+            onClick={onClose} 
+            className="text-tovector-red hover:bg-tovector-red/10 p-1 rounded-full"
+          >
+            <X size={20} />
+          </button>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 h-full">
-          {/* Preview Panel */}
-          <div className="col-span-2 p-6 flex flex-col space-y-4">
-            <div className="bg-gray-50 rounded-lg flex justify-center items-center h-[400px]">
-              {/* Original Image Preview */}
-              <div className="relative w-full h-full flex items-center justify-center">
-                <img 
-                  src={URL.createObjectURL(imageFile)} 
-                  alt="Original" 
-                  className="max-w-full max-h-full object-contain"
-                />
-                <div className="absolute bottom-2 left-2 bg-white/80 text-xs px-2 py-1 rounded">
-                  Original
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 rounded-lg flex justify-center items-center h-[400px]">
-              {/* Vectorized Preview (simulated) */}
-              <div className="relative w-full h-full flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-gray-400 text-center">
-                    <Edit3 size={48} className="mx-auto mb-2 text-tovector-red" />
-                    <p>Vectorized Preview</p>
-                    <p className="text-sm">(Simulated for demo)</p>
-                  </div>
-                </div>
-                <img 
-                  src={URL.createObjectURL(imageFile)} 
-                  alt="Vectorized" 
-                  className="max-w-full max-h-full object-contain opacity-60"
-                />
-                <div className="absolute bottom-2 left-2 bg-white/80 text-xs px-2 py-1 rounded">
-                  Vector
-                </div>
-              </div>
-            </div>
+        {/* Content */}
+        <div className="flex flex-col items-center justify-center bg-white p-6 h-[80vh] overflow-auto">
+          {/* Image display */}
+          <div className="flex-1 flex items-center justify-center w-full">
+            <img 
+              src={imageUrl} 
+              alt={view === 'vectorize' ? "Vectorized result" : "Original image"} 
+              className="max-w-full max-h-full object-contain"
+            />
           </div>
           
-          {/* Options Panel */}
-          <div className="border-l p-6 space-y-6">
-            <div>
-              <h3 className="font-bold mb-2">File Information</h3>
-              <p className="text-sm text-gray-600">{imageFile.name}</p>
-              <p className="text-sm text-gray-600">
-                {(imageFile.size / (1024 * 1024)).toFixed(2)} MB
-              </p>
+          {/* Action buttons based on view state */}
+          {view === 'preview' && (
+            <div className="mt-6">
+              <Button
+                className="bg-tovector-red text-black hover:bg-tovector-red/90"
+                onClick={handleVectorizeClick}
+              >
+                Vectorize (1 credit)
+              </Button>
             </div>
-            
-            <div>
-              <h3 className="font-bold mb-4">Adjust Options</h3>
-              
-              {/* Colors Option */}
-              <div className="mb-4">
-                <div className="flex justify-between mb-1">
-                  <label htmlFor="colors" className="text-sm font-medium">
-                    <PaintBucket size={16} className="inline mr-1" /> Colors: {options.colors}
-                  </label>
-                </div>
-                <input
-                  id="colors"
-                  type="range"
-                  min="2"
-                  max="16"
-                  value={options.colors}
-                  onChange={(e) => handleOptionChange('colors', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
-              
-              {/* Simplify Paths Option */}
-              <div className="mb-4">
-                <div className="flex justify-between mb-1">
-                  <label htmlFor="simplify" className="text-sm font-medium">
-                    <Minimize size={16} className="inline mr-1" /> Simplify Paths: {options.simplify}%
-                  </label>
-                </div>
-                <input
-                  id="simplify"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={options.simplify}
-                  onChange={(e) => handleOptionChange('simplify', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
-              
-              {/* Smoothing Option */}
-              <div className="mb-4">
-                <div className="flex justify-between mb-1">
-                  <label htmlFor="smoothing" className="text-sm font-medium">
-                    <Edit3 size={16} className="inline mr-1" /> Smoothing: {options.smoothing}%
-                  </label>
-                </div>
-                <input
-                  id="smoothing"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={options.smoothing}
-                  onChange={(e) => handleOptionChange('smoothing', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
+          )}
+          
+          {view === 'vectorize' && (
+            <div className="mt-6">
+              <Button
+                className="bg-tovector-red text-black hover:bg-tovector-red/90"
+                onClick={handleDownload}
+              >
+                <Download size={18} className="mr-2" />
+                Download
+              </Button>
             </div>
-            
-            <button 
-              onClick={handleDownload}
-              className="btn-primary w-full py-3 flex items-center justify-center"
-            >
-              <Download size={18} className="mr-2" />
-              Download Vector (SVG)
-            </button>
-            
-            <div className="text-center text-sm text-gray-600 mt-4">
-              <p>Using 1 credit for this conversion</p>
-            </div>
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
