@@ -8,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   isLoggedIn: boolean;
   credits: number;
+  freePreviews: number;
   refreshCredits: () => Promise<void>;
 }
 
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   isLoggedIn: false,
   credits: 0,
+  freePreviews: 0,
   refreshCredits: async () => {},
 });
 
@@ -23,13 +25,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isLoaded, userId } = useClerkAuth();
   const { user } = useUser();
   const [credits, setCredits] = useState(0);
+  const [freePreviews, setFreePreviews] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   // Function to refresh user's credit balance
   const refreshCredits = async () => {
     if (userId) {
-      const userCredits = await getUserCredits(userId);
-      setCredits(userCredits);
+      try {
+        // Fetch credit balance
+        const { data, error } = await supabase
+          .from('user_credits')
+          .select('credit_balance, free_previews')
+          .eq('user_id', userId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user credits:', error);
+        } else {
+          setCredits(data?.credit_balance || 0);
+          setFreePreviews(data?.free_previews || 0);
+        }
+      } catch (error) {
+        console.error('Error refreshing credits:', error);
+      }
     }
   };
 
@@ -40,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('user_credits')
-        .select('user_id')
+        .select('user_id, credit_balance, free_previews')
         .eq('user_id', userId)
         .single();
 
@@ -51,8 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .insert({
             user_id: userId,
             credit_balance: 0,
+            free_previews: 1, // Give 1 free preview to new users
             created_at: new Date().toISOString()
           });
+      } else if (data) {
+        // User exists, set credits and free previews
+        setCredits(data.credit_balance || 0);
+        setFreePreviews(data.free_previews || 0);
       }
 
       // Get user credits
@@ -77,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading: !isLoaded || isLoading, 
       isLoggedIn: !!userId,
       credits,
+      freePreviews,
       refreshCredits
     }}>
       {children}
