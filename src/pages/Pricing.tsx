@@ -1,6 +1,8 @@
-
 import React from 'react';
 import { Check } from 'lucide-react';
+import { useAuth as useClerkAuth, SignUpButton } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 // New pricing data
 const pricingPlans = [
@@ -17,7 +19,7 @@ const pricingPlans = [
       { text: 'Basic support', included: true },
       { text: 'Commercial usage rights', included: true }
     ],
-    buttonText: 'Select Plan',
+    credits: 10,
     isPopular: false
   },
   {
@@ -33,7 +35,7 @@ const pricingPlans = [
       { text: 'Priority support', included: true },
       { text: 'Commercial usage rights', included: true }
     ],
-    buttonText: 'Select Plan',
+    credits: 25,
     isPopular: true
   },
   {
@@ -49,83 +51,76 @@ const pricingPlans = [
       { text: 'Premium support', included: true },
       { text: 'Commercial usage rights', included: true }
     ],
-    buttonText: 'Select Plan',
+    credits: 50,
     isPopular: false
   }
 ];
 
 const PricingCard = ({ 
-  title, 
-  price, 
-  description, 
-  features, 
-  buttonText, 
-  isPopular 
+  plan,
+  isLoggedIn,
+  onSelect
 }: {
-  title: string;
-  price: string;
-  description: string;
-  features: { text: string; included: boolean }[];
-  buttonText: string;
-  isPopular: boolean;
-}) => {
-  return (
-    <div className={`relative rounded-2xl overflow-hidden transition-all duration-300 h-full flex flex-col bg-white border ${
-      isPopular ? 'shadow-xl scale-105 z-10 border-tovector-red' : 'shadow-md hover:shadow-lg border-gray-200'
-    }`}
-    >
-      {isPopular && (
-        <div className="absolute top-0 inset-x-0 text-center text-sm font-medium text-black bg-tovector-red py-1.5">
-          Most Popular
+  plan: typeof pricingPlans[0],
+  isLoggedIn: boolean,
+  onSelect: (credits: number) => void
+}) => (
+  <div className={`relative rounded-2xl h-full flex flex-col bg-white border ${
+    plan.isPopular ? 'shadow-xl scale-105 border-tovector-red' : 'shadow-md border-gray-200'
+  }`}>
+    {plan.isPopular && (
+      <div className="absolute top-0 inset-x-0 text-center text-sm font-medium text-black bg-tovector-red py-1.5">
+        Most Popular
+      </div>
+    )}
+    
+    <div className={`p-8 ${plan.isPopular ? 'pt-12' : ''}`}>
+      <h3 className="text-xl font-bold text-black">{plan.title}</h3>
+      <div className="mt-4">
+        <span className="text-4xl font-extrabold text-black">{plan.price}</span>
+      </div>
+      <p className="mt-2 text-sm text-gray-500">{plan.description}</p>
+      
+      <ul className="mt-6 space-y-4">
+        {plan.features.map((feature, i) => (
+          <li key={i} className="flex items-start">
+            <Check size={20} className="flex-shrink-0 text-tovector-red" />
+            <span className="ml-3 text-sm text-gray-700">{feature.text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    
+    <div className="mt-auto p-8 pt-0">
+      {isLoggedIn ? (
+        <button 
+          onClick={() => onSelect(plan.credits)}
+          className="w-full py-3 px-4 rounded-md text-black font-medium bg-tovector-red hover:bg-tovector-red/90 cursor-pointer"
+        >
+          Purchase Credits
+        </button>
+      ) : (
+        <div className="flex items-center space-x-4">
+          <SignUpButton mode="modal">
+            <Button className="bg-tovector-red text-black hover:bg-tovector-red/90">
+              Select Plan
+            </Button>
+          </SignUpButton>
         </div>
       )}
-      
-      <div className={`p-8 ${isPopular ? 'pt-12' : ''}`}>
-        <h3 className="text-xl font-bold text-black">
-          {title}
-        </h3>
-        
-        <div className="mt-4 flex items-baseline">
-          <span className="text-4xl font-extrabold tracking-tight text-black">
-            {price}
-          </span>
-        </div>
-        
-        <p className="mt-2 text-sm text-gray-500">
-          {description}
-        </p>
-        
-        <ul className="mt-6 space-y-4">
-          {features.map((feature, i) => (
-            <li key={i} className="flex items-start">
-              <Check 
-                size={20} 
-                className="flex-shrink-0 text-tovector-red"
-              />
-              <span className="ml-3 text-sm text-gray-700">
-                {feature.text}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      
-      <div className="mt-auto p-8 pt-0">
-        <button 
-          className={`w-full py-3 px-4 rounded-md text-black font-medium transition-colors ${
-            isPopular 
-              ? 'bg-tovector-red hover:bg-tovector-red/90'
-              : 'bg-tovector-red/90 hover:bg-tovector-red'
-          }`}
-        >
-          {buttonText}
-        </button>
-      </div>
     </div>
-  );
-};
+  </div>
+);
 
 const Pricing = () => {
+  const { userId } = useClerkAuth();
+  const navigate = useNavigate();
+
+  const handleSelectPlan = (credits: number) => {
+    console.log('handleSelectPlan called with credits:', credits);
+    navigate(`/purchase?credits=${credits}`);
+  };
+
   return (
     <div className="min-h-screen bg-white py-24">
       <div className="container mx-auto px-6">
@@ -139,18 +134,24 @@ const Pricing = () => {
           </p>
           <div className="w-20 h-1 bg-tovector-red mx-auto mt-6"></div>
         </div>
+
+        {/* Test button outside pricing cards */}
+        <div className="text-center mb-8">
+          <SignUpButton mode="modal">
+            <Button className="bg-tovector-red text-black hover:bg-tovector-red/90">
+              Test Sign Up Button
+            </Button>
+          </SignUpButton>
+        </div>
         
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {pricingPlans.map((plan, index) => (
             <PricingCard
               key={index}
-              title={plan.title}
-              price={plan.price}
-              description={plan.description}
-              features={plan.features}
-              buttonText={plan.buttonText}
-              isPopular={plan.isPopular}
+              plan={plan}
+              isLoggedIn={!!userId}
+              onSelect={handleSelectPlan}
             />
           ))}
         </div>
