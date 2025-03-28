@@ -1,0 +1,107 @@
+---
+description: Apply these rules when creating the project
+globs:
+alwaysApply: true
+---
+## Project Overview
+
+*   **Type:** Web-Based Platform
+*   **Description:** A platform for converting PNG/JPG images to vector formats, tailored for small businesses in the design and printing industry. It offers a simplified vectorization process, actionable insights, and secure user management using Clerk Auth.
+*   **Primary Goal:** Streamline image vectorization with secure uploads, efficient credit management, and seamless integration with third-party services (Stripe, Supabase), while ensuring compliance with VAT regulations and GDPR.
+
+## Project Structure
+
+### Framework-Specific Routing
+
+*   **Directory Rules:**
+
+    *   **Next.js 14 (App Router):** Enforce the use of the `app/` directory with nested route folders for all components. For example, `app/[route]/page.tsx` should be used.
+    *   Example 1: "Next.js 14 (App Router)" → `app/[route]/page.tsx` conventions.
+    *   Example 2: "Next.js (Pages Router)" → `pages/[route].tsx` pattern (not applicable here).
+    *   Example 3: "React Router 6" → `src/routes/` with `createBrowserRouter` (for reference only).
+
+### Core Directories
+
+*   **Versioned Structure:**
+
+    *   **app/api:** Next.js 14 API routes using Route Handlers to manage operations such as image uploads, credit management, and webhook processing.
+    *   **app/auth:** Dedicated folder for Clerk Auth integrations and authentication flows.
+    *   **app/edit, app/preview, app/vectorize, app/confirmation:** Separate nested route folders for the respective functionalities like editing images, previewing, vectorizing, and order confirmation.
+
+### Key Files
+
+*   **Stack-Versioned Patterns:**
+
+    *   **app/dashboard/layout.tsx:** Root layout file for authenticated sections and dashboard components.
+    *   **app/global.css & tailwind.config.js:** For global styling and Tailwind CSS configuration aligned with the project design preferences.
+    *   **app/auth/[[...clerk]].tsx:** Custom authentication flow using Clerk with redirections as needed.
+
+## Tech Stack Rules
+
+*   **Version Enforcement:**
+
+    *   **next@14:** App Router is required. All route components must reside inside the `app/` directory with nested routing. Avoid using legacy methods such as `getInitialProps`.
+    *   **Tailwind CSS:** Ensure configuration is optimized for a minimalistic interface with white backgrounds, black text, and red accents.
+    *   **TypeScript:** Strict typing must be maintained across the project.
+    *   **Supabase:** Use Row-Level Security (RLS) consistently for secure backend operations.
+
+## PRD Compliance
+
+*   **Non-Negotiable:**
+
+    *   "Uploaded images/vectorized results should be retained for 24 hours; transaction records for 7 years; user activity logs for 1 year; and user profile data as long as the account is active." This constraint must be enforced across all data handling processes.
+    *   VAT Handling: Critical integration with VIES VAT validation and proper VAT calculation rules for EU customers.
+
+## App Flow Integration
+
+*   **Stack-Aligned Flow:**
+
+    *   Example: "Next.js 14 Auth Flow" → `app/auth/login/page.tsx` uses server actions for Clerk Auth sign in and redirection mechanisms.
+    *   Automatic redirection from the Image Uploader to `/edit` upon successful upload with an image_id parameter.
+    *   Pre-checkout and confirmation processes leverage Next.js server-side functions (e.g., `getServerSideProps` in `/confirmation`).
+
+## Best Practices
+
+*   **Next.js**
+
+    *   Maintain a clear separation between server and client components, especially in the App Router structure.
+    *   Use server actions for critical flows such as authentication and payment confirmation.
+    *   Avoid mixing legacy Pages Router patterns with the new App Router conventions.
+
+*   **Tailwind CSS**
+
+    *   Keep utility classes concise and consistent.
+    *   Utilize configuration for theme customization (e.g., colors for white backgrounds, black text, red accents).
+    *   Optimize for performance by purging unused styles in production builds.
+
+*   **TypeScript**
+
+    *   Enforce strict typing for all components and API handlers.
+    *   Use interfaces and types for consistent data structures across the application.
+    *   Integrate ESLint and Prettier to maintain code quality.
+
+*   **Supabase**
+
+    *   Implement Row-Level Security (RLS) for secure data operations.
+    *   Utilize Supabase's real-time capabilities for the Sales Analytics Dashboard.
+    *   Ensure proper backup strategies are in place (daily Supabase backups with weekly manual exports, and custom backup solution for storage to AWS S3).
+
+*   **Clerk Auth**
+
+    *   Implement secure, passwordless authentication with clear error handling.
+    *   Utilize Clerk's session management and webhooks for real-time updates.
+    *   Ensure proper redirection flows post-sign up and sign in.
+
+*   **Stripe Integration**
+
+    *   Validate and pass metadata (Company Name, VAT Address, VAT Number) correctly to Stripe Checkout.
+    *   Securely handle webhook events to update user credits in Supabase.
+    *   Provide clear error messages and refund logic in case of failed transactions.
+
+## Rules
+
+*   Derive folder/file patterns directly from the versions specified in the techStackDoc and adhere to CodeGuide Starter Pro project structure principles.
+*   If using Next.js 14 App Router: Enforce the use of the `app/` directory with nested route folders. Do not use deprecated methods or patterns (e.g., legacy `pages/` directory).
+*   For all routing rules, ensure that the structure is consistent and version-specific conventions are strictly followed.
+*   VAT handling and error management protocols defined in the PRD are non-negotiable and must be accurately implemented.
+*   Maintain clear documentation and inline code comments to reflect decisions made based on PRD and design preferences.
