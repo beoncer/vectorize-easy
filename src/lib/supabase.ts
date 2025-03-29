@@ -8,36 +8,32 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase credentials');
 }
 
-// Create a singleton instance
-let supabaseInstance: ReturnType<typeof createClient> | null = null;
-
 // Create a function to get a Supabase client with user context
 export const getSupabaseClient = (userId: string) => {
-  if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'apikey': supabaseAnonKey,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-          'X-User-ID': userId
-        }
-      },
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false
-      },
-      db: {
-        schema: 'public'
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'apikey': supabaseAnonKey,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+        'x-user-id': userId
       }
-    });
-  }
-  return supabaseInstance;
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
 };
 
 // Default client for non-authenticated requests
-export const supabase = getSupabaseClient('anonymous');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+});
 
 // Helper functions for image storage
 export const uploadImage = async (file: File, userId: string): Promise<{ path: string; id: string } | null> => {
