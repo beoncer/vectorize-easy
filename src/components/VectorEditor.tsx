@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,7 +20,7 @@ const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile 
   const { toast } = useToast();
   const navigate = useNavigate();
   const params = useParams();
-  const { isLoggedIn, userId, credits, refreshCredits } = useAuth();
+  const { isLoggedIn, userId, credits, refreshCredits, freePreviews } = useAuth();
   
   // Generate a random ID for the image or use the one from URL
   const imageId = React.useMemo(() => {
@@ -72,29 +71,47 @@ const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile 
       return;
     }
 
-    if (credits < 0.2) {
+    // Check if user has free previews or enough credits
+    if (freePreviews > 0) {
+      // Use free preview
+      if (userId) {
+        const success = await deductCredits(userId, 0, 'preview');
+        if (success) {
+          setView('preview');
+          updateUrlPath();
+          // Refresh user credits
+          refreshCredits();
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to use free preview. Please try again.",
+            variant: "destructive"
+          });
+        }
+      }
+    } else if (credits < 0.2) {
       toast({
         title: "Insufficient credits",
         description: "You need at least 0.2 credits to preview. Please purchase more credits.",
         variant: "destructive"
       });
       return;
-    }
-
-    // Deduct credits for preview
-    if (userId) {
-      const success = await deductCredits(userId, 0.2, 'preview');
-      if (success) {
-        setView('preview');
-        updateUrlPath();
-        // Refresh user credits
-        refreshCredits();
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to deduct credits. Please try again.",
-          variant: "destructive"
-        });
+    } else {
+      // Use regular credits
+      if (userId) {
+        const success = await deductCredits(userId, 0.2, 'preview');
+        if (success) {
+          setView('preview');
+          updateUrlPath();
+          // Refresh user credits
+          refreshCredits();
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to deduct credits. Please try again.",
+            variant: "destructive"
+          });
+        }
       }
     }
   };
@@ -171,7 +188,7 @@ const VectorEditor: React.FC<VectorEditorProps> = ({ isOpen, onClose, imageFile 
                     className="border-tovector-red text-black hover:bg-tovector-red/10"
                     onClick={handlePreviewClick}
                   >
-                    Preview (0.2 credits)
+                    {freePreviews > 0 ? `Preview (1 Free Preview Left)` : 'Preview (0.2 credits)'}
                   </Button>
                   <Button
                     variant="outline"

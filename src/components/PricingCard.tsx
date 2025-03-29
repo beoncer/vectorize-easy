@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Check } from 'lucide-react';
 
@@ -15,6 +14,7 @@ interface PricingCardProps {
   isPopular?: boolean;
   buttonText: string;
   index: number;
+  onSelect: () => void;
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({
@@ -24,7 +24,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
   features,
   isPopular = false,
   buttonText,
-  index
+  index,
+  onSelect
 }) => {
   const isEven = index % 2 === 0;
 
@@ -86,6 +87,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
       
       <div className="mt-auto p-8 pt-0">
         <button 
+          onClick={onSelect}
           className={`w-full py-3 px-4 rounded-md text-tovector-white font-medium transition-colors ${
             isPopular 
               ? 'bg-tovector-red hover:bg-tovector-red/90'

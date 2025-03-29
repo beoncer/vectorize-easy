@@ -15,6 +15,7 @@ CREATE TYPE credit_action_type AS ENUM ('preview', 'vectorize');
 CREATE TABLE IF NOT EXISTS user_credits (
     user_id TEXT PRIMARY KEY,
     credit_balance INTEGER NOT NULL DEFAULT 0,
+    free_previews INTEGER NOT NULL DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -31,13 +32,20 @@ CREATE TABLE IF NOT EXISTS credit_logs (
 -- Create images table
 CREATE TABLE IF NOT EXISTS images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
+    user_id UUID NOT NULL,
     path TEXT NOT NULL,
     original_name TEXT NOT NULL,
     mime_type TEXT NOT NULL,
     size BIGINT NOT NULL,
+    width INTEGER NOT NULL,
+    height INTEGER NOT NULL,
+    was_resized BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    CONSTRAINT fk_images_user
+        FOREIGN KEY (user_id)
+        REFERENCES auth.users(id)
+        ON DELETE CASCADE
 );
 
 -- Create indexes for better query performance
