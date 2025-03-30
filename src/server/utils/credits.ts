@@ -8,8 +8,8 @@ export async function checkAndDeductCredits(
   try {
     // Start a transaction
     const { data: credit, error: creditError } = await supabase
-      .from('credits')
-      .select('amount')
+      .from('user_credits')
+      .select('credit_balance, free_previews')
       .eq('user_id', userId)
       .single();
 
@@ -18,14 +18,15 @@ export async function checkAndDeductCredits(
       return false;
     }
 
-    if (credit.amount < amount) {
+    // Check if user has enough credits
+    if (credit.credit_balance < amount) {
       return false;
     }
 
     // Deduct credits
     const { error: updateError } = await supabase
-      .from('credits')
-      .update({ amount: credit.amount - amount })
+      .from('user_credits')
+      .update({ credit_balance: credit.credit_balance - amount })
       .eq('user_id', userId);
 
     if (updateError) {
@@ -35,11 +36,12 @@ export async function checkAndDeductCredits(
 
     // Record transaction
     const { error: transactionError } = await supabase
-      .from('credit_transactions')
+      .from('transactions')
       .insert({
         user_id: userId,
-        amount: -amount,
-        type: 'usage',
+        type: 'vectorize',
+        credits_amount: amount,
+        status: 'completed',
         description
       });
 
@@ -47,8 +49,8 @@ export async function checkAndDeductCredits(
       console.error('Error recording transaction:', transactionError);
       // Rollback credit deduction
       await supabase
-        .from('credits')
-        .update({ amount: credit.amount })
+        .from('user_credits')
+        .update({ credit_balance: credit.credit_balance })
         .eq('user_id', userId);
       return false;
     }
@@ -68,8 +70,8 @@ export async function addCredits(
   try {
     // Start a transaction
     const { data: credit, error: creditError } = await supabase
-      .from('credits')
-      .select('amount')
+      .from('user_credits')
+      .select('credit_balance')
       .eq('user_id', userId)
       .single();
 
@@ -78,14 +80,14 @@ export async function addCredits(
       return false;
     }
 
-    const currentAmount = credit?.amount || 0;
+    const currentAmount = credit?.credit_balance || 0;
 
     // Add credits
     const { error: updateError } = await supabase
-      .from('credits')
+      .from('user_credits')
       .upsert({
         user_id: userId,
-        amount: currentAmount + amount
+        credit_balance: currentAmount + amount
       });
 
     if (updateError) {
@@ -95,11 +97,12 @@ export async function addCredits(
 
     // Record transaction
     const { error: transactionError } = await supabase
-      .from('credit_transactions')
+      .from('transactions')
       .insert({
         user_id: userId,
-        amount,
         type: 'purchase',
+        credits_amount: amount,
+        status: 'completed',
         description
       });
 
@@ -107,8 +110,8 @@ export async function addCredits(
       console.error('Error recording transaction:', transactionError);
       // Rollback credit addition
       await supabase
-        .from('credits')
-        .update({ amount: currentAmount })
+        .from('user_credits')
+        .update({ credit_balance: currentAmount })
         .eq('user_id', userId);
       return false;
     }
