@@ -1,14 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize the Supabase client
+// For browser environment, use import.meta.env
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase credentials');
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-// Create a function to get a Supabase client with user context
+// Create Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Function to get a Supabase client with user's JWT token
 export const getSupabaseClient = (userId: string) => {
   return createClient(supabaseUrl, supabaseAnonKey, {
     global: {
@@ -21,19 +24,11 @@ export const getSupabaseClient = (userId: string) => {
       }
     },
     auth: {
-      persistSession: false,
-      autoRefreshToken: false
+      persistSession: true,
+      autoRefreshToken: true
     }
   });
 };
-
-// Default client for non-authenticated requests
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false
-  }
-});
 
 // Helper functions for image storage
 export const uploadImage = async (file: File, userId: string): Promise<{ path: string; id: string } | null> => {
