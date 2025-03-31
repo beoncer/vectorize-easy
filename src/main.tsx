@@ -1,3 +1,4 @@
+
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
 import App from './App.tsx';
@@ -11,24 +12,12 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Clerk Publishable Key. Add VITE_CLERK_PUBLISHABLE_KEY to your environment variables.');
 }
 
-// Get the current URL for Clerk configuration
-const currentUrl = window.location.origin;
-const ngrokUrl = 'https://4f26-2001-7d0-8224-e00-4090-148-9305-b2a0.ngrok-free.app';
-const allowedUrls = [
-  currentUrl,
-  'http://localhost:8082',
-  ngrokUrl,
-  `${ngrokUrl}/sign-in`,
-  `${ngrokUrl}/sign-up`,
-  `${ngrokUrl}/dashboard`
-];
-
 createRoot(document.getElementById("root")!).render(
   <ClerkProvider
     publishableKey={PUBLISHABLE_KEY}
     navigate={(to) => window.location.href = to}
     afterSignInUrl="/dashboard"
-    afterSignUpUrl="/"
+    afterSignUpUrl="/dashboard"
     signInUrl="/sign-in"
     signUpUrl="/sign-up"
     appearance={{
@@ -37,9 +26,13 @@ createRoot(document.getElementById("root")!).render(
         colorBackground: "white",
         colorInputBackground: "white",
         colorAlphaShade: "black",
+        colorPrimary: "#ff0000"  // Using tovector red as primary color
       },
+      elements: {
+        formButtonPrimary: "bg-tovector-red text-black hover:bg-tovector-red/90",
+        footerActionLink: "text-tovector-red hover:text-tovector-red/90"
+      }
     }}
-    allowedRedirectOrigins={allowedUrls}
   >
     <AuthProvider>
       <App />
