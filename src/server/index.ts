@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import multer from 'multer';
-import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
 import { supabase } from './lib/supabase';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,9 +16,9 @@ import logger, {
   logHttp, 
   startPerformanceMonitoring,
   getHealthStatus,
-  trackError 
+  trackError,
+  logWarning
 } from './utils/logger';
-import { createClient } from '@supabase/supabase-js';
 import { Redis } from 'ioredis';
 import { 
   UserProfile, 
@@ -39,8 +38,7 @@ dotenv.config();
 // Validate required environment variables
 const requiredEnvVars = [
   'SUPABASE_URL',
-  'SUPABASE_ANON_KEY',
-  'CLERK_SECRET_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
   'STRIPE_SECRET_KEY',
   'FRONTEND_URL'
 ];
@@ -74,22 +72,43 @@ app.use(express.json());
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
+  apiVersion: '2025-02-24.acacia'
 });
 
-// Initialize Supabase client
-const supabaseClient = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+// Initialize Redis client with error handling
+let redis: Redis | null = null;
+try {
+  if (process.env.REDIS_URL) {
+    redis = new Redis(process.env.REDIS_URL, {
+      retryStrategy: (times) => {
+        if (times > 3) {
+          console.warn('Redis connection failed after 3 attempts, continuing without Redis');
+          return null;
+        }
+        return Math.min(times * 50, 2000);
+      },
+      maxRetriesPerRequest: 3,
+      enableOfflineQueue: false
+    });
 
-// Initialize Redis client
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  tls: process.env.REDIS_TLS === 'true'
-});
+    // Handle Redis connection events
+    redis.on('error', (err: Error & { code?: string }) => {
+      if (err.code === 'ECONNREFUSED') {
+        console.warn('Redis connection refused, continuing without Redis');
+        redis = null;
+      } else {
+        console.warn('Redis error:', err.message);
+      }
+    });
+
+    redis.on('connect', () => {
+      console.log('Redis connected successfully');
+    });
+  }
+} catch (error) {
+  console.warn('Failed to initialize Redis:', error);
+  redis = null;
+}
 
 // Middleware for performance monitoring
 app.use((req: Request, res: Response, next) => {
@@ -114,7 +133,7 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
     }
 
     const token = authHeader.split(' ')[1];
-    const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+    const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
       return res.status(401).json({ error: 'Invalid token' });
@@ -136,10 +155,11 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
 app.use('/api/vectorize', authMiddleware);
 app.use('/api/credits', authMiddleware);
 app.use('/api/subscription', authMiddleware);
+app.use('/api/upload', authMiddleware);
+app.use('/api/preview', authMiddleware);
 
 // Image upload endpoint
 app.post('/api/upload', 
-  authMiddleware,
   uploadLimiter,
   upload.single('file'),
   async (req: Request, res: Response<ImageUploadResponse | { error: string }>) => {
@@ -189,7 +209,7 @@ app.post('/api/upload',
         const filePath = `${req.auth.userId}/${fileName}`;
         uploadedFilePath = filePath;
 
-        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('images')
           .upload(filePath, resizedImage, {
             contentType: req.file.mimetype,
@@ -203,7 +223,7 @@ app.post('/api/upload',
         }
 
         // Create image record in database
-        const { data: imageData, error: dbError } = await supabaseClient
+        const { data: imageData, error: dbError } = await supabase
           .from('images')
           .insert({
             user_id: req.auth.userId,
@@ -240,7 +260,7 @@ app.post('/api/upload',
         const filePath = `${req.auth.userId}/${fileName}`;
         uploadedFilePath = filePath;
 
-        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('images')
           .upload(filePath, req.file.buffer, {
             contentType: req.file.mimetype,
@@ -301,7 +321,6 @@ app.post('/api/upload',
 
 // Preview endpoint
 app.post('/api/preview',
-  ClerkExpressRequireAuth(),
   async (req: Request, res: Response) => {
     try {
       const { imageId } = req.body;
@@ -349,7 +368,6 @@ app.post('/api/preview',
 
 // Vectorize endpoint
 app.post('/api/vectorize',
-  ClerkExpressRequireAuth(),
   async (req: Request, res: Response) => {
     try {
       const { imageId, options } = req.body;
@@ -449,7 +467,6 @@ app.post('/api/vectorize',
 
 // Credit purchase endpoint
 app.post('/api/stripe',
-  ClerkExpressRequireAuth(),
   async (req: Request, res: Response) => {
     try {
       const { amount, currency = 'usd' } = req.body;
@@ -496,7 +513,6 @@ app.post('/api/stripe',
 
 // Payment confirmation endpoint
 app.post('/api/confirmation',
-  ClerkExpressRequireAuth(),
   async (req: Request, res: Response) => {
     try {
       const { sessionId } = req.body;

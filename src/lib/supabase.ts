@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-// For browser environment, use import.meta.env
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Handle both browser and Node.js environments
+const supabaseUrl = typeof window !== 'undefined' 
+  ? import.meta.env.VITE_SUPABASE_URL 
+  : process.env.SUPABASE_URL;
+
+const supabaseAnonKey = typeof window !== 'undefined'
+  ? import.meta.env.VITE_SUPABASE_ANON_KEY
+  : process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
