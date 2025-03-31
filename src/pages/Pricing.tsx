@@ -1,8 +1,9 @@
 import React from 'react';
 import { Check } from 'lucide-react';
-import { useAuth as useClerkAuth, SignUpButton } from '@clerk/clerk-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 // New pricing data
 const pricingPlans = [
@@ -101,11 +102,11 @@ const PricingCard = ({
         </button>
       ) : (
         <div className="flex items-center space-x-4">
-          <SignUpButton mode="modal">
+          <Link to="/sign-up">
             <Button className="bg-tovector-red text-black hover:bg-tovector-red/90">
               Select Plan
             </Button>
-          </SignUpButton>
+          </Link>
         </div>
       )}
     </div>
@@ -113,7 +114,7 @@ const PricingCard = ({
 );
 
 const Pricing = () => {
-  const { userId } = useClerkAuth();
+  const { userId } = useAuth();
   const navigate = useNavigate();
 
   const handleSelectPlan = (credits: number) => {
@@ -137,11 +138,11 @@ const Pricing = () => {
 
         {/* Test button outside pricing cards */}
         <div className="text-center mb-8">
-          <SignUpButton mode="modal">
+          <Link to="/sign-up">
             <Button className="bg-tovector-red text-black hover:bg-tovector-red/90">
               Test Sign Up Button
             </Button>
-          </SignUpButton>
+          </Link>
         </div>
         
         {/* Pricing Cards */}
@@ -165,12 +166,12 @@ const Pricing = () => {
             Check out our FAQ section for more information or contact our support team for personalized assistance.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="/faq" className="btn-secondary">
+            <Link to="/faq" className="btn-secondary">
               View FAQ
-            </a>
-            <a href="/support" className="btn-primary">
+            </Link>
+            <Link to="/support" className="btn-primary">
               Contact Support
-            </a>
+            </Link>
           </div>
         </div>
       </div>

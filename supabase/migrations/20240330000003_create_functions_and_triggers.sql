@@ -94,6 +94,20 @@ CREATE TRIGGER on_credit_transaction
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_credit_transaction();
 
+-- Function to check remaining free previews
+CREATE OR REPLACE FUNCTION public.get_remaining_free_previews(user_id UUID)
+RETURNS INTEGER AS $$
+DECLARE
+    remaining_previews INTEGER;
+BEGIN
+    SELECT free_previews INTO remaining_previews
+    FROM public.user_credits
+    WHERE user_id = get_remaining_free_previews.user_id;
+    
+    RETURN COALESCE(remaining_previews, 0);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Function to handle free previews
 CREATE OR REPLACE FUNCTION public.handle_free_preview()
 RETURNS TRIGGER AS $$

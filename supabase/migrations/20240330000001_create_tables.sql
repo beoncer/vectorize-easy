@@ -136,6 +136,7 @@ CREATE TABLE analytics (
 CREATE INDEX idx_user_credits_user_id ON user_credits(user_id);
 CREATE INDEX idx_transactions_user_id ON transactions(user_id);
 CREATE INDEX idx_transactions_created_at ON transactions(created_at);
+CREATE INDEX idx_transactions_is_free ON transactions(is_free);
 CREATE INDEX idx_credit_logs_user_id ON credit_logs(user_id);
 CREATE INDEX idx_credit_logs_created_at ON credit_logs(created_at);
 CREATE INDEX idx_images_user_id ON images(user_id);

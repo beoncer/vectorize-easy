@@ -19,6 +19,19 @@ import logger, {
   getHealthStatus,
   trackError 
 } from './utils/logger';
+import { createClient } from '@supabase/supabase-js';
+import { Redis } from 'ioredis';
+import { 
+  UserProfile, 
+  UserCredits, 
+  VectorizeResponse, 
+  VectorizeRequest,
+  StripeWebhookEvent,
+  StripeCustomer,
+  StripeSubscription,
+  StripeProduct,
+  Config
+} from './types';
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +77,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16'
 });
 
+// Initialize Supabase client
+const supabaseClient = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
+
+// Initialize Redis client
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  password: process.env.REDIS_PASSWORD,
+  tls: process.env.REDIS_TLS === 'true'
+});
+
 // Middleware for performance monitoring
 app.use((req: Request, res: Response, next) => {
   const endMonitoring = startPerformanceMonitoring();
@@ -78,9 +105,41 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
+// Supabase Auth Middleware
+const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'No authorization header' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    req.user = user;
+    req.auth = {
+      userId: user.id,
+      email: user.email!
+    };
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    res.status(401).json({ error: 'Authentication failed' });
+  }
+};
+
+// Protected routes
+app.use('/api/vectorize', authMiddleware);
+app.use('/api/credits', authMiddleware);
+app.use('/api/subscription', authMiddleware);
+
 // Image upload endpoint
 app.post('/api/upload', 
-  ClerkExpressRequireAuth(),
+  authMiddleware,
   uploadLimiter,
   upload.single('file'),
   async (req: Request, res: Response<ImageUploadResponse | { error: string }>) => {
@@ -130,7 +189,7 @@ app.post('/api/upload',
         const filePath = `${req.auth.userId}/${fileName}`;
         uploadedFilePath = filePath;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await supabaseClient.storage
           .from('images')
           .upload(filePath, resizedImage, {
             contentType: req.file.mimetype,
@@ -144,7 +203,7 @@ app.post('/api/upload',
         }
 
         // Create image record in database
-        const { data: imageData, error: dbError } = await supabase
+        const { data: imageData, error: dbError } = await supabaseClient
           .from('images')
           .insert({
             user_id: req.auth.userId,
@@ -181,7 +240,7 @@ app.post('/api/upload',
         const filePath = `${req.auth.userId}/${fileName}`;
         uploadedFilePath = filePath;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await supabaseClient.storage
           .from('images')
           .upload(filePath, req.file.buffer, {
             contentType: req.file.mimetype,

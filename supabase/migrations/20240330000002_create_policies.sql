@@ -35,6 +35,14 @@ CREATE POLICY "Users can view own transactions"
     ON transactions FOR SELECT
     USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can view own free transactions"
+    ON transactions FOR SELECT
+    USING (auth.uid() = user_id AND is_free = true);
+
+CREATE POLICY "Users can view own paid transactions"
+    ON transactions FOR SELECT
+    USING (auth.uid() = user_id AND is_free = false);
+
 -- Credit Logs Policies
 CREATE POLICY "Users can view own credit logs"
     ON credit_logs FOR SELECT
